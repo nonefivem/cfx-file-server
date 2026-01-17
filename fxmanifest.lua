@@ -6,4 +6,4 @@ description "File upload server for FiveM"
 author "NoneM"
 version "0.1.0"
 
-server_script "server.js"
+server_script "dist/server.js"
