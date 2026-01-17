@@ -1,5 +1,6 @@
 fx_version "cerulean"
 game "gta5"
+node_version "22"
 
 name "no-file-server"
 description "File upload server for FiveM"
