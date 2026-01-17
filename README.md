@@ -3,7 +3,7 @@
 
 # no-file-server
 
-**A lightweight local file upload server for FiveM resources**
+**A lightweight local file upload server for FiveM**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)

@@ -1,6 +1,8 @@
 import { Hono } from "hono/tiny";
+import { BASE_URL, RESOURCE_NAME } from "../constants";
 import { uploadService } from "../services/upload.service";
 
+const UPLOADS_BASE_URL = BASE_URL + `/${RESOURCE_NAME}/uploads`;
 export const uploadRoutes = new Hono();
 
 // Upload a file
@@ -18,7 +20,9 @@ uploadRoutes.post("/", async (c) => {
   }
 
   const filename = await uploadService.save(file);
-  return c.json({ success: true, filename }, 201);
+  const url = `${UPLOADS_BASE_URL}/${filename}`;
+
+  return c.json({ success: true, filename, url }, 200);
 });
 
 // Get/serve a file

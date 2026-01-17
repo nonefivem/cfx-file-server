@@ -55,8 +55,8 @@ class UploadService {
 
     const filename = this.generateUniqueFilename(file.name);
     const filePath = join(this.uploadDir, filename);
-
     const buffer = await file.arrayBuffer();
+
     await fs.writeFile(filePath, Buffer.from(buffer));
 
     return filename;
