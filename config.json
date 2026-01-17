@@ -1,0 +1,26 @@
+{
+  "storage": {
+    "directory": "./storage",
+    "fileExtension": ".json"
+  },
+  "server": {
+    "hostname": "localhost"
+  },
+  "cache": {
+    "ttl": 30000
+  },
+  "uploads": {
+    "directory": "./uploads",
+    "maxFileSizeMB": 10,
+    "allowedMimeTypes": [
+      "image/png",
+      "image/jpeg",
+      "image/gif",
+      "image/webp",
+      "audio/mpeg",
+      "audio/ogg",
+      "audio/wav",
+      "audio/webm"
+    ]
+  }
+}
