@@ -1,5 +1,5 @@
 {
-  "name": "no-file-server",
+  "name": "@nonem/cfx-file-server",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
