@@ -15,6 +15,6 @@ setHttpCallback(
   getRequestListener(app.fetch.bind(app), {
     hostname: config.server.hostname,
     overrideGlobalObjects: false,
-    autoCleanupIncoming: true,
-  }),
+    autoCleanupIncoming: true
+  })
 );

@@ -2,10 +2,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export interface Config {
-  storage: {
-    directory: string;
-    fileExtension: string;
-  };
   server: {
     hostname: string;
   };
@@ -27,15 +23,11 @@ function loadConfig(): Config {
   } catch (error) {
     // Return defaults if config file doesn't exist
     return {
-      storage: {
-        directory: "./storage",
-        fileExtension: ".json",
-      },
       server: {
-        hostname: "localhost",
+        hostname: "localhost"
       },
       cache: {
-        ttl: 30000,
+        ttl: 30000
       },
       uploads: {
         directory: "./uploads",
@@ -52,9 +44,9 @@ function loadConfig(): Config {
           "audio/mpeg",
           "audio/ogg",
           "audio/wav",
-          "audio/webm",
-        ],
-      },
+          "audio/webm"
+        ]
+      }
     };
   }
 }

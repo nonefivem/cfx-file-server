@@ -1,8 +1,4 @@
 {
-  "storage": {
-    "directory": "./storage",
-    "fileExtension": ".json"
-  },
   "server": {
     "hostname": "localhost"
   },
