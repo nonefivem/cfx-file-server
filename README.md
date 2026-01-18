@@ -3,7 +3,7 @@
 
 # no-file-server
 
-**A lightweight local file upload server for FiveM**
+**A lightweight file server for FiveM using CFX HTTP wrapper**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)
@@ -68,19 +68,6 @@ https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads
 ```
 POST https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads
 GET  https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads/screenshot_1234567890_abc123.jpg
-```
-
-## Development
-
-```bash
-# Install dependencies
-bun install
-
-# Build for production (minified)
-bun run build
-
-# Build for development (with sourcemaps)
-bun run build:dev
 ```
 
 ## License
