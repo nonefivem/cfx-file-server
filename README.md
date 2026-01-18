@@ -52,10 +52,23 @@ Edit `config.json` to customize:
 
 ## API Endpoints
 
+Endpoints are available at:
+
+```
+https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads
+```
+
 | Method | Endpoint             | Description                                   |
 | ------ | -------------------- | --------------------------------------------- |
 | `POST` | `/uploads`           | Upload a file (multipart form, field: `file`) |
 | `GET`  | `/uploads/:filename` | Get/serve a file                              |
+
+### Example
+
+```
+POST https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads
+GET  https://<cfx-username>-<server-id>.users.cfx.re/no-file-server/uploads/screenshot_1234567890_abc123.jpg
+```
 
 ## Development
 
