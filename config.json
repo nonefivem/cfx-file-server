@@ -1,7 +1,7 @@
 {
   "security": {
     "trustedOrigins": ["*"],
-    "isPlayerCheck": false
+    "isPlayerCheck": true
   },
   "cache": {
     "ttl": 30000
