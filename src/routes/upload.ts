@@ -1,12 +1,11 @@
 import { Hono } from "hono/tiny";
-import { BASE_URL, RESOURCE_NAME } from "../constants";
 import { uploadService } from "../services/upload.service";
+import { buildURL } from "../utils";
 
-const UPLOADS_BASE_URL = BASE_URL + `/${RESOURCE_NAME}/uploads`;
 export const uploadRoutes = new Hono();
 
 // Upload a file
-uploadRoutes.post("/", async (c) => {
+uploadRoutes.post("/", async c => {
   const body = await c.req.formData();
   const file = body.get("file");
 
@@ -20,13 +19,13 @@ uploadRoutes.post("/", async (c) => {
   }
 
   const filename = await uploadService.save(file);
-  const url = `${UPLOADS_BASE_URL}/${filename}`;
+  const url = buildURL(`uploads/${filename}`);
 
   return c.json({ success: true, filename, url }, 200);
 });
 
 // Get/serve a file
-uploadRoutes.get("/:filename", async (c) => {
+uploadRoutes.get("/:filename", async c => {
   const filename = c.req.param("filename");
   const fileBuffer = await uploadService.get(filename);
 
@@ -38,7 +37,7 @@ uploadRoutes.get("/:filename", async (c) => {
   return new Response(fileBuffer, {
     headers: {
       "Content-Type": mimeType,
-      "Content-Length": fileBuffer.length.toString(),
-    },
+      "Content-Length": fileBuffer.length.toString()
+    }
   });
 });
