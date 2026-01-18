@@ -7,11 +7,13 @@ export interface Config {
     trustedOrigins: string[];
     isPlayerCheck: boolean;
   };
-  server: {
-    hostname: string;
-  };
   cache: {
     ttl: number;
+  };
+  rateLimit: {
+    enabled: boolean;
+    maxRequests: number;
+    windowMs: number;
   };
   uploads: {
     directory: string;
@@ -36,11 +38,13 @@ function loadConfig(): Config {
         trustedOrigins: ["*"],
         isPlayerCheck: true
       },
-      server: {
-        hostname: "localhost"
-      },
       cache: {
         ttl: 30000
+      },
+      rateLimit: {
+        enabled: true,
+        maxRequests: 10,
+        windowMs: 60000
       },
       uploads: {
         directory: "./uploads",

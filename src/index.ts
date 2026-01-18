@@ -3,6 +3,7 @@ import { setHttpCallback } from "@citizenfx/http-wrapper";
 import type { IncomingMessage, ServerResponse } from "http";
 import { config } from "./config";
 import { playersService } from "./services/players.service";
+import { rateLimitService } from "./services/ratelimit.service";
 import { parseMultipart, readBody } from "./services/multipart.service";
 import { uploadService } from "./services/upload.service";
 import { buildURL } from "./utils";
@@ -19,12 +20,16 @@ function setCors(req: IncomingMessage, res: ServerResponse): void {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-function checkPlayerIp(req: IncomingMessage): boolean {
-  if (!config.security.isPlayerCheck) return true;
+function getClientIp(req: IncomingMessage): string | undefined {
   const addr =
     (req as any).connection?.remoteAddress || (req as any).socket?.remoteAddress;
-  const ip = addr?.split(":")[0];
-  return ip && playersService.isIpConnected(ip);
+  return addr?.split(":")[0];
+}
+
+function checkPlayerIp(req: IncomingMessage): boolean {
+  if (!config.security.isPlayerCheck) return true;
+  const ip = getClientIp(req);
+  return ip ? playersService.isIpConnected(ip) : false;
 }
 
 function json(res: ServerResponse, status: number, data: object): void {
@@ -75,7 +80,8 @@ async function handleGetFile(
   const mimeType = uploadService.getMimeType(filename);
   res.writeHead(200, {
     "Content-Type": mimeType,
-    "Content-Length": fileBuffer.length.toString()
+    "Content-Length": fileBuffer.length.toString(),
+    "Cache-Control": "public, max-age=31536000, immutable"
   });
   res.end(fileBuffer);
 }
@@ -101,6 +107,12 @@ setHttpCallback(async (req: IncomingMessage, res: ServerResponse) => {
   try {
     // POST /uploads - Upload a file
     if (method === "POST" && (url === "/uploads" || url === "/uploads/")) {
+      // Rate limit uploads only
+      const clientIp = getClientIp(req);
+      if (clientIp && !rateLimitService.isAllowed(clientIp)) {
+        res.setHeader("Retry-After", rateLimitService.getResetTime(clientIp).toString());
+        return json(res, 429, { error: "Too many requests" });
+      }
       await handleUpload(req, res);
       return;
     }

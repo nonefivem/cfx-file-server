@@ -23,8 +23,10 @@ Runs on FiveM's Node.js runtime via `@citizenfx/http-wrapper`.
 
 - 📁 **File Uploads** - Upload images, audio, video, and documents
 - 🔗 **File Serving** - Access uploaded files via HTTP
+- 🛡️ **Rate Limiting** - Configurable per-IP request limits
+- 🔒 **Player IP Check** - Restrict access to connected players only
 - ⚙️ **Configurable** - Max file size, allowed mime types, directories
-- **Lightweight** - Minimal dependencies, fast builds
+- 🚀 **Lightweight** - Minimal dependencies, fast builds
 
 ## Installation
 
@@ -37,11 +39,16 @@ Runs on FiveM's Node.js runtime via `@citizenfx/http-wrapper`.
 
 Edit `config.json` to customize:
 
-| Option                     | Description         | Default                   |
-| -------------------------- | ------------------- | ------------------------- |
-| `uploads.directory`        | Upload folder path  | `./uploads`               |
-| `uploads.maxFileSizeMB`    | Max file size in MB | `10`                      |
-| `uploads.allowedMimeTypes` | Allowed file types  | Images, audio, video, PDF |
+| Option                     | Description                     | Default              |
+| -------------------------- | ------------------------------- | -------------------- |
+| `security.trustedOrigins`  | Allowed CORS origins            | `["*"]`              |
+| `security.isPlayerCheck`   | Only allow connected player IPs | `true`               |
+| `rateLimit.enabled`        | Enable rate limiting            | `true`               |
+| `rateLimit.maxRequests`    | Max requests per time window    | `10`                 |
+| `rateLimit.windowMs`       | Time window in milliseconds     | `60000` (1 minute)   |
+| `uploads.directory`        | Upload folder path              | `./uploads`          |
+| `uploads.maxFileSizeMB`    | Max file size in MB             | `10`                 |
+| `uploads.allowedMimeTypes` | Allowed file types              | Images, audio, video |
 
 ## API Endpoints
 
