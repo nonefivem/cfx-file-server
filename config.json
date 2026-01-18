@@ -1,4 +1,8 @@
 {
+  "security": {
+    "trustedOrigins": ["*"],
+    "isPlayerCheck": false
+  },
   "server": {
     "hostname": "localhost"
   },

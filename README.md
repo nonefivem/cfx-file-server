@@ -8,7 +8,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Bun](https://img.shields.io/badge/Bun-000000?style=for-the-badge&logo=bun&logoColor=white)](https://bun.sh/)
 [![FiveM](https://img.shields.io/badge/FiveM-F40552?style=for-the-badge&logo=fivem&logoColor=white)](https://fivem.net/)
-[![Hono](https://img.shields.io/badge/Hono-E36002?style=for-the-badge&logo=hono&logoColor=white)](https://hono.dev/)
 
 </div>
 
@@ -18,7 +17,7 @@
 
 **no-file-server** is a simple HTTP file upload server designed for FiveM. It allows your server-side scripts to upload, store, and serve files (images, audio, video, PDFs) locally without relying on external services.
 
-Built with [Hono](https://hono.dev/) and runs on FiveM's Node.js runtime via `@citizenfx/http-wrapper`.
+Runs on FiveM's Node.js runtime via `@citizenfx/http-wrapper`.
 
 ## Features
 

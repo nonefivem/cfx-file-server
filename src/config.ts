@@ -1,7 +1,12 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { RESOURCE_NAME } from "./constants";
 
 export interface Config {
+  security: {
+    trustedOrigins: string[];
+    isPlayerCheck: boolean;
+  };
   server: {
     hostname: string;
   };
@@ -17,12 +22,20 @@ export interface Config {
 
 function loadConfig(): Config {
   try {
-    const configPath = join(process.cwd(), "config.json");
+    const configPath = join(GetResourcePath(RESOURCE_NAME), "config.json");
     const configData = readFileSync(configPath, "utf-8");
     return JSON.parse(configData) as Config;
   } catch (error) {
+    console.warn(
+      "Could not load config.json, using default configuration.",
+      (error as Error).message
+    );
     // Return defaults if config file doesn't exist
     return {
+      security: {
+        trustedOrigins: ["*"],
+        isPlayerCheck: true
+      },
       server: {
         hostname: "localhost"
       },
