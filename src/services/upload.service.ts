@@ -1,11 +1,13 @@
-import { promises as fs } from "node:fs";
+import { promises as fs, createReadStream } from "node:fs";
 import { join, extname } from "node:path";
+import type { ServerResponse } from "http";
 import { config } from "../config";
+import type { ParsedFile } from "../utils/multipart";
 
 class UploadService {
   private readonly uploadDir = config.uploads.directory;
   private readonly maxFileSizeMB = config.uploads.maxFileSizeMB;
-  private readonly maxFileSizeBytes = this.maxFileSizeMB * 1024 * 1024;
+  readonly maxFileSizeBytes = this.maxFileSizeMB * 1024 * 1024;
   private readonly allowedMimeTypes = config.uploads.allowedMimeTypes;
 
   private async ensureUploadDir(): Promise<void> {
@@ -32,32 +34,32 @@ class UploadService {
     return `${name}_${timestamp}_${random}${ext}`;
   }
 
-  validateFile(file: File): { valid: boolean; error?: string } {
+  validateFile(file: ParsedFile): { valid: boolean; error?: string } {
     if (file.size > this.maxFileSizeBytes) {
       return {
         valid: false,
-        error: `File size exceeds maximum allowed size of ${this.maxFileSizeMB}MB`,
+        error: `File size exceeds maximum allowed size of ${this.maxFileSizeMB}MB`
       };
     }
 
-    if (!this.allowedMimeTypes.includes(file.type)) {
+    if (!this.allowedMimeTypes.includes(file.mimeType)) {
       return {
         valid: false,
-        error: `File type ${file.type} is not allowed. Allowed types: ${this.allowedMimeTypes.join(", ")}`,
+        error: `File type ${file.mimeType} is not allowed. Allowed types: ${this.allowedMimeTypes.join(", ")}`
       };
     }
 
     return { valid: true };
   }
 
-  async save(file: File): Promise<string> {
+  async save(file: ParsedFile): Promise<string> {
     await this.ensureUploadDir();
 
-    const filename = this.generateUniqueFilename(file.name);
+    const filename = this.generateUniqueFilename(file.filename);
     const filePath = join(this.uploadDir, filename);
-    const buffer = await file.arrayBuffer();
 
-    await fs.writeFile(filePath, Buffer.from(buffer));
+    // Write buffer directly - no extra copy
+    await fs.writeFile(filePath, file.buffer);
 
     return filename;
   }
@@ -72,6 +74,38 @@ class UploadService {
       return await fs.readFile(filePath);
     } catch (error) {
       return null;
+    }
+  }
+
+  /**
+   * Stream file directly to response - much better for large files
+   * Avoids loading entire file into memory
+   */
+  async stream(filename: string, res: ServerResponse): Promise<boolean> {
+    await this.ensureUploadDir();
+
+    const sanitized = this.sanitizeFilename(filename);
+    const filePath = join(this.uploadDir, sanitized);
+
+    try {
+      const stat = await fs.stat(filePath);
+      const mimeType = this.getMimeType(filename);
+
+      res.writeHead(200, {
+        "Content-Type": mimeType,
+        "Content-Length": stat.size.toString(),
+        "Cache-Control": "public, max-age=31536000, immutable"
+      });
+
+      const stream = createReadStream(filePath);
+      stream.pipe(res);
+
+      return new Promise(resolve => {
+        stream.on("end", () => resolve(true));
+        stream.on("error", () => resolve(false));
+      });
+    } catch (error) {
+      return false;
     }
   }
 
@@ -128,7 +162,7 @@ class UploadService {
       ".mp3": "audio/mpeg",
       ".ogg": "audio/ogg",
       ".wav": "audio/wav",
-      ".weba": "audio/webm",
+      ".weba": "audio/webm"
     };
     return mimeTypes[ext] || "application/octet-stream";
   }

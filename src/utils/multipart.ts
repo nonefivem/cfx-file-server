@@ -1,17 +1,36 @@
 import type { IncomingMessage } from "http";
 
-export function readBody(req: IncomingMessage): Promise<Buffer> {
+export interface ParsedFile {
+  filename: string;
+  mimeType: string;
+  buffer: Buffer;
+  size: number;
+}
+
+export function readBody(req: IncomingMessage, maxSize: number): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
+    let totalSize = 0;
+
     req.on("data", (chunk: Buffer) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      totalSize += buf.length;
+
+      // Early rejection if size exceeds limit (avoid wasting memory)
+      if (totalSize > maxSize) {
+        req.destroy();
+        reject(new Error("FILE_TOO_LARGE"));
+        return;
+      }
+
+      chunks.push(buf);
     });
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
 }
 
-export function parseMultipart(body: Buffer, boundary: string): File | null {
+export function parseMultipart(body: Buffer, boundary: string): ParsedFile | null {
   const marker = Buffer.from(`--${boundary}`);
   const positions: number[] = [];
   let pos = 0;
@@ -42,9 +61,13 @@ export function parseMultipart(body: Buffer, boundary: string): File | null {
     let contentEnd = part.length;
     if (part[contentEnd - 2] === 0x0d && part[contentEnd - 1] === 0x0a) contentEnd -= 2;
 
-    return new File([part.subarray(headerEnd + 4, contentEnd)], filenameMatch[1], {
-      type: mimeType
-    });
+    const buffer = part.subarray(headerEnd + 4, contentEnd);
+    return {
+      filename: filenameMatch[1],
+      mimeType,
+      buffer,
+      size: buffer.length
+    };
   }
 
   return null;

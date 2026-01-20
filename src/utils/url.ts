@@ -1,4 +1,4 @@
-import { RESOURCE_NAME } from "./constants";
+import { RESOURCE_NAME } from "../constants";
 
 /**
  * Build a full URL based on the base URL convar and the provided path.

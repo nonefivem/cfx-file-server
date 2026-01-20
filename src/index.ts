@@ -4,37 +4,13 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { config } from "./config";
 import { playersService } from "./services/players.service";
 import { rateLimitService } from "./services/ratelimit.service";
-import { parseMultipart, readBody } from "./services/multipart.service";
 import { uploadService } from "./services/upload.service";
-import { buildURL } from "./utils";
-
-function setCors(req: IncomingMessage, res: ServerResponse): void {
-  const origin = req.headers.origin || "*";
-  if (
-    config.security.trustedOrigins.includes("*") ||
-    config.security.trustedOrigins.includes(origin)
-  ) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-  }
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-}
-
-function getClientIp(req: IncomingMessage): string | undefined {
-  const addr =
-    (req as any).connection?.remoteAddress || (req as any).socket?.remoteAddress;
-  return addr?.split(":")[0];
-}
+import { setCors, getClientIp, json, parseMultipart, readBody, buildURL } from "./utils";
 
 function checkPlayerIp(req: IncomingMessage): boolean {
   if (!config.security.isPlayerCheck) return true;
   const ip = getClientIp(req);
   return ip ? playersService.isIpConnected(ip) : false;
-}
-
-function json(res: ServerResponse, status: number, data: object): void {
-  res.writeHead(status, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(data));
 }
 
 async function handleUpload(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -48,7 +24,17 @@ async function handleUpload(req: IncomingMessage, res: ServerResponse): Promise<
     return json(res, 400, { error: "Missing boundary" });
   }
 
-  const body = await readBody(req);
+  let body: Buffer;
+  try {
+    // Early rejection if body exceeds max size (with some overhead for multipart headers)
+    body = await readBody(req, uploadService.maxFileSizeBytes + 10240);
+  } catch (err: any) {
+    if (err?.message === "FILE_TOO_LARGE") {
+      return json(res, 413, { error: "File too large" });
+    }
+    throw err;
+  }
+
   const file = parseMultipart(body, boundary);
 
   if (!file) {
@@ -71,19 +57,12 @@ async function handleGetFile(
   res: ServerResponse,
   filename: string
 ): Promise<void> {
-  const fileBuffer = await uploadService.get(filename);
+  // Use streaming - file is piped directly without loading into memory
+  const success = await uploadService.stream(filename, res);
 
-  if (!fileBuffer) {
+  if (!success) {
     return json(res, 404, { error: "File not found" });
   }
-
-  const mimeType = uploadService.getMimeType(filename);
-  res.writeHead(200, {
-    "Content-Type": mimeType,
-    "Content-Length": fileBuffer.length.toString(),
-    "Cache-Control": "public, max-age=31536000, immutable"
-  });
-  res.end(fileBuffer);
 }
 
 setHttpCallback(async (req: IncomingMessage, res: ServerResponse) => {
