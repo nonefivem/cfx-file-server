@@ -3,6 +3,8 @@
 
 # no-file-server
 
+> **⚠️ DEPRECATION NOTICE:** This project will be deprecated at the end of March 2026. Please see [FiveM Nucleus Decrypt File Hosting Alternative](https://nonefivem.com/blog/fivem-nucleus-decrypt-file-hosting-alternative) for more details and migration options.
+
 **A lightweight file server for FiveM using CFX HTTP wrapper**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
